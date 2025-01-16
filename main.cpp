@@ -1,3 +1,4 @@
+// PROJECT IDENTIFIER: 40FB54C86566B9DDEAB902CC80E8CE85C1C62AAD
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -23,12 +24,13 @@ void getOptions(int argc, char **argv, Options &options) {
 
     option longOptions[] = {
         {"help", no_argument, nullptr, 'h'},
-        {"captain", required_argument, nullptr, 'c'},
-        {"first-mate", required_argument, nullptr, 'f'},
-        {"hunt-order", required_argument, nullptr, 'o'},
+        {"captain", optional_argument, nullptr, 'c'},
+        {"first-mate", optional_argument, nullptr, 'f'},
+        {"hunt-order", optional_argument, nullptr, 'o'},
         {"verbose", no_argument, nullptr, 'v'},
-        {"show_path", required_argument, nullptr, 'p'}
-    }
+        {"show_path", no_argument, nullptr, 'p'},
+        {"stats", no_argument, nullptr, 's'}
+    };
 }
 
 
@@ -37,4 +39,7 @@ int main(int argc, char *argv[]) {
 
     Options options;;
     getOptions(argc, argv, options);
+
+    
 }
+
