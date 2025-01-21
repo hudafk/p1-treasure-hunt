@@ -5,16 +5,20 @@
 #include <string>
 #include <vector>
 
+#include "Treasure_Hunt.h"
+
 #include <getopt.h>
 using namespace std;
 
+
+enum class Mode {
+    NONE = 0,
+    BFS,
+    DFS,
+};
+
 struct Options {
-    int help = 0;
-    int captain = 1;
-    int first_mate = 2;
-    int hunt_order = 3;
-    int verbose = 4;
-    int show_path = 5;
+    Mode mode = Mode::NONE;
 };
 
 void getOptions(int argc, char **argv, Options &options) {
@@ -24,22 +28,46 @@ void getOptions(int argc, char **argv, Options &options) {
 
     option longOptions[] = {
         {"help", no_argument, nullptr, 'h'},
-        {"captain", optional_argument, nullptr, 'c'},
-        {"first-mate", optional_argument, nullptr, 'f'},
-        {"hunt-order", optional_argument, nullptr, 'o'},
+        {"captain", required_argument, nullptr, 'c'},
+        {"first-mate", required_argument, nullptr, 'f'},
+        {"hunt-order", required_argument, nullptr, 'o'},
         {"verbose", no_argument, nullptr, 'v'},
         {"show_path", no_argument, nullptr, 'p'},
-        {"stats", no_argument, nullptr, 's'}
+        {"stats", no_argument, nullptr, 's'},
+        {nullptr, 0, nullptr, '\0'}
     };
+
+    while((choice = getopt_long(argc, argv,"hc:f:o:vps", static_cast<option *>(longOptions), &index)) != 1) {
+        switch (choice) {
+            case 'h':
+                cout << "under construction~" << endl;
+            case 'c':
+                cout << "under construction~" << endl;
+            case 'f':
+                cout << "under construction~" << endl;
+            case 'o':
+                cout << "under construction~" << endl;
+            case 'v':
+                cout << "under construction~" << endl;
+            case 'p':
+                cout << "under construction~" << endl;
+            case 's':
+                cout << "under construction~" << endl;
+        }
+    }
+
+    options.mode = Mode::NONE;
 }
 
 
 int main(int argc, char *argv[]) {
     ios_base::sync_with_stdio(false);
 
-    Options options;;
+    Treasure_Hunt hunt;
+
+    Options options;
     getOptions(argc, argv, options);
 
-    
+    hunt.create_grid();
 }
 
