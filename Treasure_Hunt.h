@@ -9,14 +9,24 @@
 #include <deque>
 
 
+struct Point {
+    char direction;
+    char value;
+    size_t row;
+    size_t col;
+    bool discovered;
+    size_t prev_row;
+    size_t prev_col;
+};
+
 
 class Treasure_Hunt {
     public:
         Treasure_Hunt() {}
-        
+
         Treasure_Hunt(std::string hunt_order_in) : hunt_order (hunt_order_in) {}
 
-        void create_grid(); //reads the input file and creates the grid
+        void create_map(); //reads the input file and creates the grid
 
         void hunt();
 
@@ -25,16 +35,21 @@ class Treasure_Hunt {
         void first_mate_search(std::pair<size_t, size_t> coordinate); 
 
         void print_results();
+
+        void print_grid();
     
     private:
-        std::vector<std::vector<int>> grid; //pass by reference in functions
-        std::deque<std::pair<int,int>> captain_container;
+        std::vector<std::vector<char>> map; //pass by reference in functions
+        std::deque<Point> captain_container;
         std::deque<std::pair<size_t,size_t>> first_mate_container;
-        std::vector<std::pair<char,std::pair<size_t, size_t>>> path;
-        std::pair<size_t,size_t> start;
+        Point start = {'@',0,0};
         std::pair<size_t,size_t> treasure;
         bool verbose;
         bool stats; 
+        bool show_path;
+        void verbose();
+        void stats();
+        void show_path();
         std::string hunt_order = "NESW";
         bool is_valid_index(char c, std::pair<size_t, size_t> coordinate);
 };

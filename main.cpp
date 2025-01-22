@@ -19,7 +19,17 @@ enum class Mode {
 
 struct Options {
     Mode mode = Mode::NONE;
+    string captainContainer = "STACK";
+    string firstMateContainer = "QUEUE";
+    string huntOrder; 
+    bool verbose = false;
+    bool showPath = false;
+    bool stats = false;
 };
+
+void printHelp(char *command) {
+    cout << "Usage: " << command << " under construction~" << endl;
+}
 
 void getOptions(int argc, char **argv, Options &options) {
     opterr = static_cast<int>(false);
@@ -37,26 +47,35 @@ void getOptions(int argc, char **argv, Options &options) {
         {nullptr, 0, nullptr, '\0'}
     };
 
-    while((choice = getopt_long(argc, argv,"hc:f:o:vps", static_cast<option *>(longOptions), &index)) != 1) {
+    while((choice = getopt_long(argc, argv,"hc:f:o:vps", static_cast<option *>(longOptions), &index)) != -1) {
         switch (choice) {
             case 'h':
-                cout << "under construction~" << endl;
+                printHelp(*argv); //print help statements
+                exit(1);
             case 'c':
-                cout << "under construction~" << endl;
+                options.captainContainer = optarg; //set captain's container type
+                break;
             case 'f':
-                cout << "under construction~" << endl;
+                options.firstMateContainer = optarg; //set fm's container type
+                break;
             case 'o':
-                cout << "under construction~" << endl;
+                options.huntOrder = optarg; //hunt order specified
+                break;
             case 'v':
-                cout << "under construction~" << endl;
+                options.verbose = true; //print verbose
+                cout << "verbose" << endl;
+                break;
             case 'p':
-                cout << "under construction~" << endl;
+                options.showPath = true; //show path
+                break;
             case 's':
-                cout << "under construction~" << endl;
+                options.stats = true; //show stats
+                break;
+            default:
+                cerr << "Invalid option!" << endl;
+                exit(1);
         }
     }
-
-    options.mode = Mode::NONE;
 }
 
 
@@ -68,6 +87,8 @@ int main(int argc, char *argv[]) {
     Options options;
     getOptions(argc, argv, options);
 
-    hunt.create_grid();
+    hunt.create_map();
+
+    hunt.print_grid();
 }
 
