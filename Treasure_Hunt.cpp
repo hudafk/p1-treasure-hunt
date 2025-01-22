@@ -3,6 +3,15 @@
 #include "Treasure_Hunt.h"
 #include <iostream>
 
+/*struct Point {
+    char direction;
+    char value;
+    size_t row;
+    size_t col;
+    bool discovered;
+};
+*/
+
 void Treasure_Hunt::create_map() {
         std:: string line;
 
@@ -19,7 +28,7 @@ void Treasure_Hunt::create_map() {
 
         if (!(std::cin >> map_size) || map_size < 2) throw std::runtime_error("map is too small!"); 
 
-        map.resize(map_size, std::vector<char>(map_size));
+        map.resize(map_size, std::vector<Point>(map_size));
 
         std::cin.ignore(); //ignore newline char
 
@@ -32,13 +41,12 @@ void Treasure_Hunt::create_map() {
                 if (line.empty()) continue;
 
                 for (size_t col = 0; col < map_size; ++col) {
-                    char terrain = line[col];
-                    map[row][col] = terrain; //fix
+                    Point point = {'X', line[col], row, col, false};
+                    map[row][col] = point; //fix
 
-                    if (terrain == '@') {
+                    if (line[col] == '@') {
                         start.row = row;
                         start.col = col;
-                        start.value = terrain;
                     }
                 }
 
@@ -49,10 +57,9 @@ void Treasure_Hunt::create_map() {
             //read the list format
             for(size_t row = 0; row < map.size(); ++row){
                 for(size_t col = 0; col < map.size(); ++col) {
-                    map[row][col] = '.';
+                    map[row][col].value = '.';
                 }
             }
-
             std::string line;
 
             while(std::getline(std::cin, line)) {
@@ -62,20 +69,22 @@ void Treasure_Hunt::create_map() {
                 size_t col = static_cast<size_t>(line[2] - '0');
                 char terrain = line[4];
 
-                map[row][col] = terrain;   
+                map[row][col].value = terrain;
+                map[row][col].row = row;
+                map[row][col].col = col;  
             }
 
         } 
 }
 
-bool Treasure_Hunt::is_valid_index(char c, std::pair<size_t, size_t> coordinate){
-    if (c == 'N') return (coordinate.first - 1 >= 0);
+bool Treasure_Hunt::is_valid_index(char c, size_t row, size_t col){
+    if (c == 'N') return (row - 1 >= 0);
 
-    if (c == 'E') return (coordinate.second + 1 < map.size());
+    if (c == 'E') return (col + 1 < map.size());
 
-    if (c == 'S') return (coordinate.first + 1 < map.size());
+    if (c == 'S') return (row + 1 < map.size());
 
-    if (c == 'W') return (coordinate.second - 1 >= 0);
+    if (c == 'W') return (col - 1 >= 0);
 
     return false;
 }
@@ -91,6 +100,13 @@ void Treasure_Hunt::captain_search() {
     while(!captain_container.empty()) {
         Point curr = captain_container.front();
         captain_container.pop_front();
+
+        for (size_t direction = 0; direction < 4; ++direction) {
+            if (is_valid_index(hunt_order[direction], curr.row, curr.col)) {
+                captain_container.push_front(curr);
+            }
+            
+        }
 
 
     }
@@ -108,64 +124,63 @@ void Treasure_Hunt::captain_search() {
     //4.Repeat from Step 2.
 
     //5.Report the outcome of the hunt (see Output Format).
-    if(verbose) verbose();
+    /*if(verbose) print_verbose();
 
-    if(stats) stats();
+    if(stats) print_stats();
 
-    if(show_path) show_path();
+    if(show_path) print_path();*/
 
 
 }
 
-void Treasure_Hunt::first_mate_search(std::pair<size_t, size_t> coordinate) {
+void Treasure_Hunt::first_mate_search(Point point) {
 
-    first_mate_container.push_back(coordinate); //push_front
+    first_mate_container.push_back(point); //push_front
 
     while(!first_mate_container.empty()){
 
         for (auto direction: hunt_order) { //ex "nesw" "esnw", etc.
             first_mate_container.pop_back();
 
-            if (direction == 'N' && is_valid_index(direction, coordinate)) { //check if it is a valid index
-                if (map[coordinate.first - 1][coordinate.second] == '$') {
-                    treasure = std::pair(coordinate.first - 1, coordinate.second);
+            if (direction == 'N' && is_valid_index(direction, point.row, point.col)) { //check if it is a valid index
+                if (map[point.row - 1][point.col].value == '$') {
                     return;
                 } //treasure found!
-                else if (map[coordinate.first - 1][coordinate.second] == 'o') {
-                    first_mate_container.push_back(std::pair(coordinate.first - 1, coordinate.second));
+                else if (map[point.row - 1][point.col].value == 'o') {
+                    first_mate_container.push_back(map[point.row - 1][point.col]);
                 } //more land found - add to the container
                 else continue;
             } //NORTH
 
-            if (direction == 'E' && is_valid_index(direction, coordinate)) { //check if it is a valid index
-                if (map[coordinate.first][coordinate.second + 1] == '$') {
-                    treasure = std::pair(coordinate.first, coordinate.second + 1);
+            if (direction == 'E' && is_valid_index(direction, point.row, point.col)) { //check if it is a valid index
+                if (map[point.row][point.col + 1].value == '$') {
+                    treasure = std::pair(point.row, point.col + 1);
                     return;
                 } //treasure found!
-                else if (map[coordinate.first][coordinate.second + 1] == 'o') {
-                    first_mate_container.push_back(std::pair(coordinate.first, coordinate.second + 1));
+                else if (map[point.row][point.col + 1].value == 'o') {
+                    first_mate_container.push_back(map[point.row][point.col + 1]);
                 } //more land found - add to the container
                 else continue;
             } //EAST
 
-            if (direction == 'S' && is_valid_index(direction, coordinate)) { //check if it is a valid index
-                if (map[coordinate.first + 1][coordinate.second] == '$') {
-                    treasure = std::pair(coordinate.first + 1, coordinate.second);
+            if (direction == 'S' && is_valid_index(direction, point.row, point.col)) { //check if it is a valid index
+                if (map[point.row + 1][point.col].value == '$') {
+                    treasure = std::pair(point.row + 1, point.col);
                     return;
                 } //treasure found!
-                else if (map[coordinate.first + 1][coordinate.second] == 'o') {
-                    first_mate_container.push_back(std::pair(coordinate.first + 1, coordinate.second));
+                else if (map[point.row + 1][point.col].value == 'o') {
+                    first_mate_container.push_back(map[point.row + 1][point.col]);
                 } //more land found - add to the container
                 else continue;
             } //SOUTH
 
-            if (direction == 'W' && is_valid_index(direction, coordinate)) { //check if it is a valid index
-                if (map[coordinate.first][coordinate.second - 1] == '$') {
-                    treasure = std::pair(coordinate.first, coordinate.second - 1);
+            if (direction == 'W' && is_valid_index(direction, point.row, point.col)) { //check if it is a valid index
+                if (map[point.row][point.col - 1].value == '$') {
+                    treasure = std::pair(point.row, point.col - 1);
                     return;
                 } //treasure found!
-                else if (map[coordinate.first][coordinate.second - 1] == 'o') {
-                    first_mate_container.push_back(std::pair(coordinate.first, coordinate.second - 1));
+                else if (map[point.row][point.col - 1].value == 'o') {
+                    first_mate_container.push_back(map[point.row][point.col - 1]);
                 } //more land found - add to the container
                 else continue;
             } //WEST
@@ -179,7 +194,7 @@ void Treasure_Hunt::first_mate_search(std::pair<size_t, size_t> coordinate) {
 void Treasure_Hunt::print_grid() {
     for (size_t row = 0; row < map.size(); ++row) {
         for (size_t col = 0; col < map.size(); ++col) {
-            std::cout << map[row][col];
+            std::cout << map[row][col].value;
         }
         std::cout << "\n";
     }

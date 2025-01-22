@@ -15,8 +15,6 @@ struct Point {
     size_t row;
     size_t col;
     bool discovered;
-    size_t prev_row;
-    size_t prev_col;
 };
 
 
@@ -32,26 +30,29 @@ class Treasure_Hunt {
 
         void captain_search();
 
-        void first_mate_search(std::pair<size_t, size_t> coordinate); 
+        void first_mate_search(Point point); 
 
         void print_results();
 
         void print_grid();
+
+        void print_verbose();
+        void print_stats();
+        void print_path();
     
     private:
-        std::vector<std::vector<char>> map; //pass by reference in functions
+        std::vector<std::vector<Point>> map; //pass by reference in functions
         std::deque<Point> captain_container;
-        std::deque<std::pair<size_t,size_t>> first_mate_container;
-        Point start = {'@',0,0};
+        std::deque<Point> first_mate_container;
+        Point start = {'X','@',0,0, true};
         std::pair<size_t,size_t> treasure;
-        bool verbose;
-        bool stats; 
-        bool show_path;
-        void verbose();
-        void stats();
-        void show_path();
+        bool verbose = false;
+        bool stats = false; 
+        bool show_path = false;
+        int land = 0;
         std::string hunt_order = "NESW";
-        bool is_valid_index(char c, std::pair<size_t, size_t> coordinate);
+        bool is_valid_index(char c, size_t row, size_t col);
+        void add_point();
 };
 
 
