@@ -13,14 +13,15 @@ using namespace std;
 
 enum class Mode {
     NONE = 0,
-    BFS,
-    DFS,
+    STATS,
+    VERBOSE,
+    SHOW_PATH
 };
 
 struct Options {
     Mode mode = Mode::NONE;
-    string captainContainer = "STACK";
-    string firstMateContainer = "QUEUE";
+    char captainContainer = 'S';
+    char firstMateContainer = 'Q';
     string huntOrder; 
     bool verbose = false;
     bool showPath = false;
@@ -53,10 +54,10 @@ void getOptions(int argc, char **argv, Options &options) {
                 printHelp(*argv); //print help statements
                 exit(1);
             case 'c':
-                options.captainContainer = optarg; //set captain's container type
+                options.captainContainer = optarg[0]; //set captain's container type
                 break;
             case 'f':
-                options.firstMateContainer = optarg; //set fm's container type
+                options.firstMateContainer = optarg[0]; //set fm's container type
                 break;
             case 'o':
                 options.huntOrder = optarg; //hunt order specified
@@ -82,13 +83,35 @@ void getOptions(int argc, char **argv, Options &options) {
 int main(int argc, char *argv[]) {
     ios_base::sync_with_stdio(false);
 
-    Treasure_Hunt hunt;
 
     Options options;
     getOptions(argc, argv, options);
 
+    /*struct Options {
+    Mode mode = Mode::NONE;
+    string captainContainer = "STACK";
+    string firstMateContainer = "QUEUE";
+    string huntOrder; 
+    bool verbose = false;
+    bool showPath = false;
+    bool stats = false;*/
+    /*bool verbose = false;
+        bool stats = false; 
+        bool show_path = false;
+        int land = 0;
+        char captain_container_type = 's';
+        char first_mate_container_type = 'q';
+        std::string hunt_order = "NESW";*/
+    cout << options.huntOrder << endl << "hmm" << endl;
+    Treasure_Hunt hunt(options.huntOrder, 
+                       options.verbose, options.stats, options.showPath,
+                       static_cast<char>(options.captainContainer), 
+                       static_cast<char>(options.firstMateContainer));
+
     hunt.create_map();
 
     hunt.print_grid();
+
+    hunt.captain_search();
 }
 
