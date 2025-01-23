@@ -72,6 +72,7 @@ void Treasure_Hunt::create_map() {
                         start.value = '@';
                         start.row = row;
                         start.col = col;
+                        start.discovered = true;
                 }
 
                 if (terrain == '$') {
@@ -85,93 +86,94 @@ void Treasure_Hunt::create_map() {
             }
 
         } 
+        add_to_container('c', start);
 }
 
 bool Treasure_Hunt::is_valid_index(char c, size_t row, size_t col){
-    if (c == 'N') return (row - 1 >= 0);
+    if (c == 'N') return (static_cast<int>(row) - 1 >= 0);
 
     if (c == 'E') return (col + 1 < map.size());
 
     if (c == 'S') return (row + 1 < map.size());
 
-    if (c == 'W') return (col - 1 >= 0);
+    if (c == 'W') return (static_cast<int>(col) - 1 >= 0);
 
     return false;
 }
 
-void Treasure_Hunt::captain_search() {
+void Treasure_Hunt::captain_search(Coordinate c) {
     if(verbose) std::cout << "Treasure hunt started at: " << start.row << ","
                           << start.col << "\n";
-
-    //Add the Starting Location (@ on the map) to the sail container.
-    add_to_container('c', start);
-    //2. If the sail container is empty, the hunt has ended (jump to Step 5). 
-       //If not, set the “sail location” to the “next” available location in the sail container 
-       //(where next is front for queue, top for stack) and remove it from the sail container.
-    while(!captain_container.empty()) {
-        Point curr = captain_container.back();
-        map[curr.row][curr.col].discovered = true;
-        captain_container.pop_back();
-
-        for (auto direction : hunt_order) {
-            if (is_valid_index(direction, curr.row, curr.col)) {
-                Point next = curr;
-                next.move(direction);
-                Point &p = map[next.row][next.col];
-
-                if (p.value == '.' && !p.discovered) {
-                    p.discovered = true;
-                    p.direction = direction;
-                    add_to_container('c',p);
-
-                }
-                else if (p.value == 'o' && !p.discovered) {
-                    p.direction = direction;
-                    first_mate_search(p);
-                    if (treasure.discovered) return;
-                }
-                else if (p.value == '$'){
-                    p.discovered = true;
-                    p.direction = direction;
-                    return;
-                }
-                else continue;
-            }
-        }
         
-        if(curr.value != '@') water_locations++;
+        while (!captain_container.empty()){
+            c.row = captain_container.back().row;
+            c.col = captain_container.back().col;
+            captain_container.pop_back();
+            water_locations++;
 
+            for (auto direction : hunt_order) {
+                Coordinate next = c;
+                if (is_valid_index(direction, next.row, next.col)) {
+                    move(next, direction);
+                    //Point &point = map[p.row][p.col];
+                    if (map[next.row][next.col].value == '.' && !map[next.row][next.col].discovered) {
+                        map[next.row][next.col].discovered = true;
+                        map[next.row][next.col].direction = direction;
+                        add_to_container('c', map[next.row][next.col]);
+
+                    }
+
+                    else if (map[next.row][next.col].value == 'o' && !map[next.row][next.col].discovered) {
+                        map[next.row][next.col].direction = direction;
+                        map[next.row][next.col].discovered = true;
+                        first_mate_search(next);
+                        if (treasure.discovered) {
+                            land_locations++;
+                            return;
+                        }
+                    }
+                    else if (map[next.row][next.col].value == '$'){
+                        map[next.row][next.col].discovered = true;
+                        map[next.row][next.col].direction = direction;
+                        land_locations++;
+                        return;
+                    }
+                    else continue;
+                }
+            }
     }
+        
     std::cout << "Treasure hunt failed\n";
 }
 
-void Treasure_Hunt::first_mate_search(Point &point) {
+void Treasure_Hunt::first_mate_search(Coordinate c) {
     went_ashore++;
 
-    if(verbose) std::cout << "Went ashore at: " << point.row << "," << point.col << "\n"
+    if(verbose) std::cout << "Went ashore at: " << c.row << "," << c.col << "\n"
                           << "Searching island... "; 
 
-    point.discovered = true;
-
-    add_to_container('f',point); 
+    add_to_container('f', map[c.row][c.col]); 
 
     while(!first_mate_container.empty()){
         Point curr = first_mate_container.back();
-        map[curr.row][curr.col].discovered = true;
-        first_mate_container.pop_back();
+        c.row = curr.row;
+        c.col = curr.col;
         land_locations++;
+        first_mate_container.pop_back();
 
         for (auto direction : hunt_order) {
             if (is_valid_index(direction, curr.row, curr.col)) {
-                curr.move(direction);
-                if (map[curr.row][curr.col].value == 'o' && !map[curr.row][curr.col].discovered) {
-                    map[curr.row][curr.col].discovered = true;
-                    map[curr.row][curr.col].direction = direction;
-                    add_to_container('f', map[curr.row][curr.col]);
+                Coordinate next = c;
+                move(next, direction);
+                if (map[next.row][next.col].value == 'o' && !map[next.row][next.col].discovered) {
+                    map[next.row][next.col].discovered = true;
+                    map[next.row][next.col].direction = direction;
+                    add_to_container('f', map[next.row][next.col]);
                 }
-                else if (map[curr.row][curr.col].value == '$') {
+                else if (map[next.row][next.col].value == '$') {
                     treasure.discovered = true;
-                    if(verbose) std::cout << "party found treasure at " << curr.row << "," << curr.col << ".\n";
+                    treasure.direction = direction;
+                    if(verbose) std::cout << "party found treasure at " << next.row << "," << next.col << ".\n";
                     return;
                 }
                 else continue;
@@ -179,22 +181,8 @@ void Treasure_Hunt::first_mate_search(Point &point) {
         }
     }
     
-    if(verbose) std::cout << "party returned with no treasure\n";
+    if(verbose) std::cout << "party returned with no treasure.\n";
     return;
-}
-
-void Treasure_Hunt::print_grid() {
-    for (size_t row = 0; row < map.size(); ++row) {
-        for (size_t col = 0; col < map.size(); ++col) {
-            std::cout << map[row][col].value;
-        }
-        std::cout << "\n";
-    }
-}
-
-void Treasure_Hunt::print_verbose() {
-    std::cout << "Treasure hunt started at: " << start.row << "," 
-              << start.col << "\n";
 }
 
 void Treasure_Hunt::add_to_container(char c, Point p){
@@ -209,6 +197,10 @@ void Treasure_Hunt::add_to_container(char c, Point p){
     }
 }
 
+void Treasure_Hunt::print_path() {
+    std::cout << "under construction\n";
+    return;
+}
 
 void Treasure_Hunt::print_stats(){
     std::cout << "--- STATS ---\n";
@@ -217,7 +209,7 @@ void Treasure_Hunt::print_stats(){
     std::cout << "Land locations investigated: " << land_locations << "\n";
     std::cout << "Went ashore: " << went_ashore << "\n";
     if (treasure.discovered) {
-        std::cout << "Path length: 7\n";
+        std::cout << "Path length: " << path_length << "\n";
         std::cout << "Treasure location: " 
                   << treasure.row << "," << treasure.col << "\n";
     }
@@ -226,13 +218,20 @@ void Treasure_Hunt::print_stats(){
 
 void Treasure_Hunt::hunt(){
 
+    Coordinate c;
+    c.row = captain_container.back().row;
+    c.col = captain_container.back().col;
+
+    captain_search(c);
+
+    backtrace();
+
     if (!treasure.discovered) std::cout << "No treasure found after investigating" << "5" << "locations.\n";
-    else std::cout << "Treasure found at " << treasure.row << "," << treasure.col << " with path length " << "length.\n"; 
+    else std::cout << "Treasure found at " << treasure.row << "," << treasure.col << " with path length " << path_length << ".\n"; 
 
     if (stats) print_stats();
-
-    //if (show_path) print_path();
-
+    
+    if (show_path) print_path();  
 }
 
 void Treasure_Hunt::backtrace() {
@@ -255,4 +254,24 @@ void Treasure_Hunt::backtrace() {
         }
         path_length++;
     }
+}
+
+void Treasure_Hunt::move(Coordinate &c, char direction) {
+       switch (direction) {
+        case 'N':
+            c.row--;
+            break;
+        case 'E':
+            c.col++;
+            break;
+        case 'S':
+            c.row++;
+            break;
+        case 'W':
+            c.col--;
+            break;
+        default:
+            std::cout << "invalid character!\n";
+       }
+
 }
