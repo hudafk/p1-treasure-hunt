@@ -22,7 +22,7 @@ struct Options {
     Mode mode = Mode::NONE;
     char captainContainer = 'S';
     char firstMateContainer = 'Q';
-    string huntOrder; 
+    string huntOrder = "NESW"; 
     bool verbose = false;
     bool showPath = false;
     bool stats = false;
@@ -64,7 +64,6 @@ void getOptions(int argc, char **argv, Options &options) {
                 break;
             case 'v':
                 options.verbose = true; //print verbose
-                cout << "verbose" << endl;
                 break;
             case 'p':
                 options.showPath = true; //show path
@@ -77,6 +76,94 @@ void getOptions(int argc, char **argv, Options &options) {
                 exit(1);
         }
     }
+}
+
+tuple<vector<vector<Point>>, Point, Point>  create_map() {
+        string line;
+
+        Point start;
+        Point treasure;
+
+        while(getline(cin, line)) {
+            if (line[0] != '#') break;
+        }
+
+        if (line.empty() || (line[0] != 'M' && line[0] != 'L')) throw runtime_error("the file isn't in correct format!");
+
+        char format = line[0]; //take in 'M' or 'L' for format
+
+        size_t map_size; //the size of the map
+
+
+        if (!(std::cin >> map_size) || map_size < 2) throw runtime_error("map is too small!"); 
+
+        vector<vector<Point>> map(map_size, vector<Point>(map_size));
+
+        std::cin.ignore(); //ignore newline char
+
+        if (format == 'M') {
+            //read the map format
+            string line;
+            size_t row = 0;
+
+            while(getline(cin, line)) {
+                if (line.empty()) continue;
+
+                for (size_t col = 0; col < map_size; ++col) {
+                    Point point('X', line[col], row, col, false);
+
+                    if (line[col] == '@') {
+                        start.row = row;
+                        start.col = col;
+                        start.value = line[col];
+                    } else if (line[col] == '$') {
+                        start.row = row;
+                        start.col = col;
+                        start.value = line[col];
+                    } else{
+                        map[row][col] = point;
+                    }
+                }
+
+                row++;
+            }
+        } 
+        else {
+            //read the list format
+            for(size_t row = 0; row < map.size(); ++row){
+                for(size_t col = 0; col < map.size(); ++col) {
+                    map[row][col].value = '.';
+                    map[row][col].row = row;
+                    map[row][col].col = col;
+                }
+            }
+
+            string line;
+
+            while(getline(cin, line)) {
+                if (line.empty()) continue;
+
+                size_t row = static_cast<size_t>(line[0] - '0');
+                size_t col = static_cast<size_t>(line[2] - '0');
+                char terrain = line[4];
+
+                if (terrain == '@') {
+                    start.row = row;
+                    start.col = col;
+                    start.value = terrain;
+                } else if (terrain == '$') {
+                        treasure.row = row;
+                        treasure.col = col;
+                        treasure.value = terrain;
+                } else{
+                    map[row][col].value = terrain;
+                    map[row][col].row = row;
+                    map[row][col].col = col; 
+                } 
+            }
+        } 
+    
+    return {map, start, treasure};
 }
 
 
@@ -102,16 +189,21 @@ int main(int argc, char *argv[]) {
         char captain_container_type = 's';
         char first_mate_container_type = 'q';
         std::string hunt_order = "NESW";*/
-    cout << options.huntOrder << endl << "hmm" << endl;
+
     Treasure_Hunt hunt(options.huntOrder, 
                        options.verbose, options.stats, options.showPath,
                        static_cast<char>(options.captainContainer), 
                        static_cast<char>(options.firstMateContainer));
+    
 
-    hunt.create_map();
+    //hunt.print_grid();
 
-    hunt.print_grid();
+    //hunt.captain_search();
 
-    hunt.captain_search();
+    //hunt.backtrace();
+
+   // hunt.print_stats();
+    
 }
+
 
