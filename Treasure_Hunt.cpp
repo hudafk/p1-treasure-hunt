@@ -23,7 +23,7 @@ void Treasure_Hunt::create_map() {
 
 
         if (!(std::cin >> map_size) || map_size < 2) {
-            std::cerr << ("map is too small!"); 
+            std::cerr << ("Map is too small!"); 
             exit(1);
         }
 
@@ -90,6 +90,10 @@ void Treasure_Hunt::create_map() {
                 char terrain = line[4];
 
                 if (terrain == '@') {
+                    if (is_start) {
+                        std::cerr << "Already have a start location" << std::endl;
+                        exit(1);
+                    }
                         start.value = '@';
                         start.row = row;
                         start.col = col;
@@ -98,6 +102,10 @@ void Treasure_Hunt::create_map() {
                 }
 
                 if (terrain == '$') {
+                    if (is_treasure) {
+                        std::cerr << "Already have a treasure location" << std::endl;
+                        exit(1);
+                    }
                         treasure.row = row;
                         treasure.col = col;
                         is_treasure = true;
@@ -290,13 +298,16 @@ void Treasure_Hunt::hunt(){
 
     captain_search(c);
 
-    if (treasure.discovered) backtrace();
+    if (treasure.discovered) {
+        backtrace();
+        
+        if (show_path) print_path(); 
+
+    }  
 
     if (stats) print_stats();
-    
-    if (show_path) print_path();  
 
-    if (!treasure.discovered) std::cout << "No treasure found after investigating" << "5" << "locations.";
+    if (!treasure.discovered) std::cout << "No treasure found after investigating " << water_locations + land_locations << " locations.";
     else std::cout << "Treasure found at " << treasure.row << "," << treasure.col << " with path length " << path_length << ".\n"; 
 }
 
