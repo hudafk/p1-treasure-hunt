@@ -10,15 +10,7 @@
 using namespace std;
 
 
-enum class Mode {
-    NONE = 0,
-    STATS,
-    VERBOSE,
-    SHOW_PATH
-};
-
 struct Options {
-    Mode mode = Mode::NONE;
     char captainContainer = 'S';
     char firstMateContainer = 'Q';
     string huntOrder = "NESW"; 
@@ -54,21 +46,61 @@ void getOptions(int argc, char **argv, Options &options) {
                 printHelp(*argv); //print help statements
                 exit(1);
             case 'c':
-                if (optarg) options.captainContainer = optarg[0];
-                //set captain's container type
+                if (optarg) {
+                    if (string(optarg) != "STACK" && string(optarg) != "QUEUE") {
+                        cerr << "Invalid argument to --captain" << endl;
+                        exit(1);
+                    } 
+                    options.captainContainer = optarg[0]; //set captain's container type
+                }
                 break;
             case 'f':
-                if (optarg) options.firstMateContainer = optarg[0]; //set fm's container type
+                if (optarg) {
+                    if (string(optarg) != "STACK" && string(optarg) != "QUEUE") {
+                        cerr << "Invalid argument to --first-mate" << endl;
+                        exit(1);
+                    } 
+                    options.firstMateContainer = optarg[0]; //set fm's container type
+                }
                 break;
             case 'o':
-                if (optarg) options.huntOrder = optarg; //hunt order specified
+                if (optarg) {
+                    string str = optarg;
+                    if(str.length() != 4) {
+                        cerr << "Invalid argument to --hunt-order" << endl;
+                        exit(1);
+                    } 
+                    string valid = "NESW";
+                    for (char c : valid) {
+                        if(count(str.begin(), str.end(), c != 1)) {
+                            cerr << "Invalid argument to --hunt-order" << endl;
+                            exit(1);
+                        }
+                    }
+                    options.huntOrder = optarg; //hunt order specified
+                }
                 break;
             case 'v':
                 options.verbose = true; //print verbose
                 break;
             case 'p':
+                if(options.showPath) {
+                    cerr << "Specify --show-path only once" << endl;
+                    exit(1);
+                } 
                 options.showPath = true; //show path
-                options.pathType = optarg[0];
+                if (optarg) {
+                    if(optarg[0] == 'M' || optarg[0] == 'L') {
+                        options.pathType = optarg[0];
+                    } 
+                    else {
+                    cerr << "Invalid argument to --show-path" << endl;
+                    exit(1);
+                    }
+                } else {
+                    cerr << "Invalid argument to --show-path" << endl;
+                    exit(1);
+                }
                 break;
             case 's':
                 options.stats = true; //show stats
@@ -175,7 +207,6 @@ int main(int argc, char *argv[]) {
     Options options;
     getOptions(argc, argv, options);
 
-    
 
     Treasure_Hunt hunt(options.huntOrder, 
                        options.verbose, options.stats, 

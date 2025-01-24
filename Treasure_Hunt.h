@@ -71,6 +71,8 @@ class Treasure_Hunt {
         std::vector<std::vector<Point>> map; //pass by reference in functions
         std::deque<Point> captain_container;
         std::deque<Point> first_mate_container;
+        std::deque<Point> sail_path;
+        std::deque<Point> search_path;
         Point start;
         Point treasure;
         bool is_valid_index(char c, size_t row, size_t col);

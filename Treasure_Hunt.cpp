@@ -1,24 +1,31 @@
 // PROJECT IDENTIFIER: 40FB54C86566B9DDEAB902CC80E8CE85C1C62AAD
-
 #include "Treasure_Hunt.h"
 #include <iostream>
 
-
 void Treasure_Hunt::create_map() {
+        bool is_start = false;
+        bool is_treasure = false;
+
         std:: string line;
 
         while(std::getline(std::cin, line)) {
             if (line[0] != '#') break;
         }
 
-        if (line.empty() || (line[0] != 'M' && line[0] != 'L')) throw std::runtime_error("the file isn't in correct format!");
+        if (line.empty() || (line[0] != 'M' && line[0] != 'L')) {
+            std::cerr << ("Unknown option");
+            exit(1);
+        }
 
         char format = line[0]; //take in 'M' or 'L' for format
 
         size_t map_size; //the size of the map
 
 
-        if (!(std::cin >> map_size) || map_size < 2) throw std::runtime_error("map is too small!"); 
+        if (!(std::cin >> map_size) || map_size < 2) {
+            std::cerr << ("map is too small!"); 
+            exit(1);
+        }
 
         map.resize(map_size, std::vector<Point>(map_size));
 
@@ -33,15 +40,23 @@ void Treasure_Hunt::create_map() {
                 if (line.empty()) continue;
 
                 for (size_t col = 0; col < map_size; ++col) {
+                    if(line[col] != '#' && line[col] != '.' && line[col] != 'o' 
+                        && line[col] != '$' && line[col] != '@') {
+                            std::cerr << "Invalid terrain type";
+                            exit(1);
+                    }
+
                     Point point('X', line[col], row, col, false);
                     map[row][col] = point; //fix
 
                     if (line[col] == '@') {
+                        is_start = true;
                         start.row = row;
                         start.col = col;
                     }
 
                    if (line[col] == '$') {
+                        is_treasure = true;
                         treasure.row = row;
                         treasure.col = col;
                     } 
@@ -64,6 +79,12 @@ void Treasure_Hunt::create_map() {
             while(std::getline(std::cin, line)) {
                 if (line.empty()) continue;
 
+                if (int(line[0] - '0') < 0 || int(line[0] - '0') >= static_cast<int>(map_size) 
+                    || int(line[2] - '0') < 0 || int(line[2] - '0') >= static_cast<int>(map_size) ) {
+                        std::cerr << "Invalid coordinates in list mode input";
+                        exit(1);
+                }
+
                 size_t row = static_cast<size_t>(line[0] - '0');
                 size_t col = static_cast<size_t>(line[2] - '0');
                 char terrain = line[4];
@@ -73,19 +94,30 @@ void Treasure_Hunt::create_map() {
                         start.row = row;
                         start.col = col;
                         start.discovered = true;
+                        is_start = true;
                 }
 
                 if (terrain == '$') {
                         treasure.row = row;
                         treasure.col = col;
+                        is_treasure = true;
                 }
 
                 map[row][col].value = terrain;
                 map[row][col].row = row;
                 map[row][col].col = col;  
             }
-
         } 
+        if(!is_treasure) {
+            std::cerr << "Map does not have treasure";
+            if(!is_start) std::cerr << "\nMap does not have a start location";
+            exit(1);
+        }
+        else if (!is_start) {
+            std::cerr << "Map does not have a start location";
+            exit(1);
+        }
+
         add_to_container('c', start);
 }
 
@@ -133,9 +165,14 @@ void Treasure_Hunt::captain_search(Coordinate c) {
                         }
                     }
                     else if (map[next.row][next.col].value == '$'){
+                        treasure.discovered = true;
+                        treasure.direction = direction;
+                        treasure.value = '$';
+                        map[next.row][next.col].value = treasure.value;
                         map[next.row][next.col].discovered = true;
                         map[next.row][next.col].direction = direction;
                         land_locations++;
+                        went_ashore++;
                         return;
                     }
                     else continue;
@@ -172,7 +209,11 @@ void Treasure_Hunt::first_mate_search(Coordinate c) {
                 }
                 else if (map[next.row][next.col].value == '$') {
                     treasure.discovered = true;
+                    treasure.value = '$';
+                    map[next.row][next.col].value = treasure.value;
                     treasure.direction = direction;
+                    map[next.row][next.col].discovered = true;
+                    map[next.row][next.col].direction = direction;
                     if(verbose) std::cout << "party found treasure at " << next.row << "," << next.col << ".\n";
                     return;
                 }
@@ -198,8 +239,33 @@ void Treasure_Hunt::add_to_container(char c, Point p){
 }
 
 void Treasure_Hunt::print_path() {
-    std::cout << "under construction\n";
-    return;
+    if(path_type == 'M') {
+        for (size_t row = 0; row < map.size(); ++row) {
+            for (size_t col = 0; col < map.size(); ++col) {
+                std::cout << map[row][col].value;
+            }
+            std::cout << "\n";
+        }
+    } 
+    else { //path_type == 'L'
+        std::cout << "Sail:\n";
+        Point curr;
+
+        while (!sail_path.empty()) {
+            curr = sail_path.back();
+            std::cout << curr.row << "," << curr.col << "\n";
+            sail_path.pop_back();
+        }
+
+        std::cout << "Search:\n";
+        curr = search_path.back();
+        while (!search_path.empty()) {
+            curr = search_path.back();
+            std::cout << curr.row << "," << curr.col << "\n";
+            search_path.pop_back();
+        }
+
+    }
 }
 
 void Treasure_Hunt::print_stats(){
@@ -224,31 +290,80 @@ void Treasure_Hunt::hunt(){
 
     captain_search(c);
 
-    backtrace();
-
-    if (!treasure.discovered) std::cout << "No treasure found after investigating" << "5" << "locations.\n";
-    else std::cout << "Treasure found at " << treasure.row << "," << treasure.col << " with path length " << path_length << ".\n"; 
+    if (treasure.discovered) backtrace();
 
     if (stats) print_stats();
     
     if (show_path) print_path();  
+
+    if (!treasure.discovered) std::cout << "No treasure found after investigating" << "5" << "locations.";
+    else std::cout << "Treasure found at " << treasure.row << "," << treasure.col << " with path length " << path_length << ".\n"; 
 }
 
 void Treasure_Hunt::backtrace() {
     Point curr = treasure;
+    if(show_path) {
+        if(path_type == 'M') map[curr.row][curr.col].value = 'X';
+        else search_path.push_back(map[curr.row][curr.col]);
+
+    }
 
     while(curr.value != '@') {
         switch(curr.direction) {
             case 'N':
+               if(show_path) {
+                if (path_type == 'M') {
+                    if (map[curr.row + 1][curr.col].value != '@') {
+                        if (map[curr.row + 1][curr.col].direction == 'E' 
+                        || map[curr.row + 1][curr.col].direction == 'W') map[curr.row + 1][curr.col].value = '+';
+                        else map[curr.row + 1][curr.col].value = '|';
+                    }
+               } else //path_typ == 'L'
+                    if (map[curr.row + 1][curr.col].value == 'o') search_path.push_back(map[curr.row + 1][curr.col]);
+                    else sail_path.push_back(map[curr.row + 1][curr.col]);
+               }
                 curr = map[curr.row + 1][curr.col];
                 break;
             case 'E':
+                if(show_path) {
+                    if (path_type == 'M') {
+                        if (map[curr.row][curr.col - 1].value != '@') {
+                            if (map[curr.row][curr.col - 1].direction == 'N' 
+                                || map[curr.row][curr.col - 1].direction == 'S') map[curr.row][curr.col - 1].value = '+';
+                            else map[curr.row][curr.col - 1].value = '-';
+                        }
+                    } else //path_type == 'L'
+                        if (map[curr.row + 1][curr.col].value == 'o') search_path.push_back(map[curr.row + 1][curr.col]);
+                        else sail_path.push_back(map[curr.row][curr.col - 1]);
+                }
                 curr = map[curr.row][curr.col - 1];
                 break;
             case 'S':
-                curr = map[curr.row + 1][curr.col];
+                if(show_path) {
+                    if (path_type == 'M') {
+                        if (map[curr.row - 1][curr.col].value != '@') {
+                            if (map[curr.row - 1][curr.col].direction == 'E' 
+                                || map[curr.row - 1][curr.col].direction == 'W') map[curr.row - 1][curr.col].value = '+';
+                                else map[curr.row - 1][curr.col].value = '|';
+                        } else
+                        if (map[curr.row - 1][curr.col].value == 'o') search_path.push_back(map[curr.row + 1][curr.col]);
+                        else sail_path.push_back(map[curr.row - 1][curr.col]);
+                    }
+                }
+                curr = map[curr.row - 1][curr.col];
                 break;
             case 'W':
+                if(show_path) {
+                    if(path_type == 'M') {
+                        if (map[curr.row][curr.col + 1].value != '@') {
+                            if (map[curr.row][curr.col + 1].direction == 'N' 
+                                || map[curr.row][curr.col + 1].direction == 'S') map[curr.row][curr.col + 1].value = '+';
+                                else map[curr.row][curr.col + 1].value = '-';
+                        }
+                    } else 
+                     if (map[curr.row][curr.col + 1].value == 'o') search_path.push_back(map[curr.row][curr.col + 1]);
+                     else sail_path.push_back(map[curr.row][curr.col + 1]);
+                }
                 curr = map[curr.row][curr.col + 1];
                 break;
         }
