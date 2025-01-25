@@ -8,10 +8,7 @@ void Treasure_Hunt::create_map() {
 
         bool is_treasure = false;
 
-
-
         std:: string line;
-
 
 
         while(std::getline(std::cin, line)) {
@@ -31,15 +28,10 @@ void Treasure_Hunt::create_map() {
         }
 
 
-
         char format = line[0]; //take in 'M' or 'L' for format
 
 
-
         size_t map_size; //the size of the map
-
-
-
 
 
         if (!(std::cin >> map_size) || map_size < 2) {
@@ -55,9 +47,7 @@ void Treasure_Hunt::create_map() {
         map.resize(map_size, std::vector<Point>(map_size));
 
 
-
         std::cin.ignore(); //ignore newline char
-
 
 
         if (format == 'M') {
@@ -156,9 +146,9 @@ void Treasure_Hunt::create_map() {
 
 
 
-                if (int(line[0] - '0') < 0 || int(line[0] - '0') >= static_cast<int>(map_size) 
+                if ((int(line[0] - '0') < 0 && int(line[0] - '0') >= static_cast<int>(map_size))
 
-                    || int(line[2] - '0') < 0 || int(line[2] - '0') >= static_cast<int>(map_size) ) {
+                    || (int(line[2] - '0') < 0 && int(line[2] - '0') >= static_cast<int>(map_size)) ) {
 
                         std::cerr << "Invalid coordinates in list mode input" << std::endl;
 
