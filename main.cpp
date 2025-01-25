@@ -52,6 +52,9 @@ void getOptions(int argc, char **argv, Options &options) {
                         exit(1);
                     } 
                     options.captainContainer = optarg[0]; //set captain's container type
+                } else {
+                    cerr << "Invalid argument to --captain" << endl;
+                    exit(1);
                 }
                 break;
             case 'f':
@@ -61,6 +64,9 @@ void getOptions(int argc, char **argv, Options &options) {
                         exit(1);
                     } 
                     options.firstMateContainer = optarg[0]; //set fm's container type
+                } else {
+                    cerr << "Invalid argument to --captain" << endl;
+                    exit(1);
                 }
                 break;
             case 'o':
