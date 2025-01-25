@@ -8,7 +8,6 @@
 #include <vector>
 #include <deque>
 
-
 struct Coordinate {
     size_t row;
     size_t col;
@@ -27,14 +26,6 @@ struct Point {
 
 };
 
-/*struct Options {
-    Mode mode = Mode::NONE;
-    string captainContainer = "STACK";
-    string firstMateContainer = "QUEUE";
-    string huntOrder; 
-    bool verbose = false;
-    bool showPath = false;
-    bool stats = false;*/
 
 class Treasure_Hunt {
     public:

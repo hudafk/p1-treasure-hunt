@@ -387,7 +387,7 @@ void Treasure_Hunt::backtrace() {
                 curr = map[curr.row][curr.col + 1];
                 break;
         }
-        path_length++;
+        path_length++; ///
     }
 }
 

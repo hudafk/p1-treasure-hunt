@@ -35,41 +35,37 @@ void getOptions(int argc, char **argv, Options &options) {
         {"first-mate", required_argument, nullptr, 'f'},
         {"hunt-order", required_argument, nullptr, 'o'},
         {"verbose", no_argument, nullptr, 'v'},
-        {"show_path", required_argument, nullptr, 'p'},
+        {"show-path", required_argument, nullptr, 'p'},
         {"stats", no_argument, nullptr, 's'},
         {nullptr, 0, nullptr, '\0'}
     };
 
     while((choice = getopt_long(argc, argv,"hc:f:o:vp:s", static_cast<option *>(longOptions), &index)) != -1) {
         switch (choice) {
-            case 'h':
+            case 'h': {
                 printHelp(*argv); //print help statements
                 exit(1);
-            case 'c':
-                if (optarg) {
-                    if (string(optarg) != "STACK" && string(optarg) != "QUEUE") {
-                        cerr << "Invalid argument to --captain" << endl;
-                        exit(1);
+            }
+            case 'c': {
+                if (optarg && (string(optarg) == "STACK" || string(optarg) == "QUEUE")) {
+                        options.captainContainer = optarg[0];
                     } 
-                    options.captainContainer = optarg[0]; //set captain's container type
+                else {
+                    cerr << "Invalid argument to --captain" << endl;
+                    exit(1);
+                } //set captain's container type
+                break;
+            }
+            case 'f': {
+                if (optarg && (string(optarg) == "STACK" || string(optarg) == "QUEUE")) {
+                    options.firstMateContainer = optarg[0];
                 } else {
                     cerr << "Invalid argument to --captain" << endl;
                     exit(1);
                 }
                 break;
-            case 'f':
-                if (optarg) {
-                    if (string(optarg) != "STACK" && string(optarg) != "QUEUE") {
-                        cerr << "Invalid argument to --first-mate" << endl;
-                        exit(1);
-                    } 
-                    options.firstMateContainer = optarg[0]; //set fm's container type
-                } else {
-                    cerr << "Invalid argument to --captain" << endl;
-                    exit(1);
-                }
-                break;
-            case 'o':
+            }
+            case 'o': {
                 if (optarg) {
                     string str = optarg;
                     if(str.length() != 4) {
@@ -83,13 +79,15 @@ void getOptions(int argc, char **argv, Options &options) {
                             exit(1);
                         }
                     }
-                    options.huntOrder = optarg; //hunt order specified
+                    options.huntOrder = str; //hunt order specified
                 }
                 break;
-            case 'v':
+            }
+            case 'v': {
                 options.verbose = true; //print verbose
                 break;
-            case 'p':
+            }
+            case 'p': {
                 if(options.showPath) {
                     cerr << "Specify --show-path only once" << endl;
                     exit(1);
@@ -100,20 +98,20 @@ void getOptions(int argc, char **argv, Options &options) {
                         options.pathType = optarg[0];
                     } 
                     else {
-                    cerr << "Invalid argument to --show-path" << endl;
-                    exit(1);
+                        cerr << "Invalid argument to --show-path" << endl;
+                        exit(1);
                     }
-                } else {
-                    cerr << "Invalid argument to --show-path" << endl;
-                    exit(1);
                 }
                 break;
-            case 's':
+            }
+            case 's': {
                 options.stats = true; //show stats
                 break;
-            default:
-                cerr << "Invalid option!" << endl;
+            }
+            default: {
+                cerr << "Unknown option" << endl;
                 exit(1);
+            }
         }
     }
 }
