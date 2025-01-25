@@ -3,68 +3,43 @@
 #include <iostream>
 
 void Treasure_Hunt::create_map() {
-
         bool is_start = false;
-
         bool is_treasure = false;
-
+        
         std:: string line;
 
-
         while(std::getline(std::cin, line)) {
-
             if (line[0] != '#') break;
-
         }
-
-
 
         if (line.empty() || (line[0] != 'M' && line[0] != 'L')) {
-
             std::cerr << ("Unknown option") << std::endl;
-
             exit(1);
-
         }
-
 
         char format = line[0]; //take in 'M' or 'L' for format
 
-
         size_t map_size; //the size of the map
-
 
         if (!(std::cin >> map_size) || map_size < 2) {
 
             std::cerr << ("Map is too small!") << std::endl; 
 
             exit(1);
-
         }
-
-
 
         map.resize(map_size, std::vector<Point>(map_size));
 
-
         std::cin.ignore(); //ignore newline char
 
-
-        if (format == 'M') {
-
-            //read the map format
+        if (format == 'M') { //read the map format
 
             std::string line;
-
             size_t row = 0;
-
-
 
             while(std::getline(std::cin, line)) {
 
                 if (line.empty()) continue;
-
-
 
                 for (size_t col = 0; col < map_size; ++col) {
 
@@ -75,170 +50,93 @@ void Treasure_Hunt::create_map() {
                             std::cerr << "Invalid terrain type" << std::endl;
 
                             exit(1);
-
                     }
-
-
 
                     Point point('X', line[col], row, col, false);
 
                     map[row][col] = point; //fix
 
-
-
                     if (line[col] == '@') {
-
                         is_start = true;
-
                         start.row = row;
-
                         start.col = col;
-
                     }
 
-
-
                    if (line[col] == '$') {
-
                         is_treasure = true;
-
                         treasure.row = row;
-
                         treasure.col = col;
-
                     } 
-
                 }
-
-
-
                 row++;
-
             }
-
         } 
 
-        else {
-
-            //read the list format
-
+        else { //read the list format
             for(size_t row = 0; row < map.size(); ++row){
-
                 for(size_t col = 0; col < map.size(); ++col) {
-
                     map[row][col].value = '.';
-
                     map[row][col].row = row;
-
                     map[row][col].col = col;
-
                 }
-
             }
 
             std::string line;
 
-
-
             while(std::getline(std::cin, line)) {
-
                 if (line.empty()) continue;
 
+                if ((int(line[0] - '0') < 0 || int(line[0] - '0') >= static_cast<int>(map_size))
 
-
-                if ((int(line[0] - '0') < 0 && int(line[0] - '0') >= static_cast<int>(map_size))
-
-                    || (int(line[2] - '0') < 0 && int(line[2] - '0') >= static_cast<int>(map_size)) ) {
+                    || (int(line[2] - '0') < 0 || int(line[2] - '0') >= static_cast<int>(map_size)) ) {
 
                         std::cerr << "Invalid coordinates in list mode input" << std::endl;
-
                         exit(1);
-
                 }
 
-
-
                 size_t row = static_cast<size_t>(line[0] - '0');
-
                 size_t col = static_cast<size_t>(line[2] - '0');
 
                 char terrain = line[4];
 
-
-
                 if (terrain == '@') {
-
                     if (is_start) {
-
                         std::cerr << "Already have a start location" << std::endl;
-
                         exit(1);
-
                     }
-
                         start.value = '@';
-
                         start.row = row;
-
                         start.col = col;
-
                         start.discovered = true;
-
                         is_start = true;
-
                 }
-
-
 
                 if (terrain == '$') {
-
                     if (is_treasure) {
-
                         std::cerr << "Already have a treasure location" << std::endl;
-
                         exit(1);
-
                     }
-
                         treasure.row = row;
-
                         treasure.col = col;
-
                         is_treasure = true;
-
                 }
 
-
-
                 map[row][col].value = terrain;
-
                 map[row][col].row = row;
-
                 map[row][col].col = col;  
-
             }
-
         } 
 
         if(!is_treasure) {
-
             std::cerr << "Map does not have treasure" << std::endl;
-
-            if(!is_start) std::cerr << "\nMap does not have a start location";
             exit(1);
-
         }
 
-        else if (!is_start) {
-
+        if (!is_start) {
             std::cerr << "Map does not have a start location" << std::endl;
-
             exit(1);
-
         }
-
         add_to_container('c', start);
-
 }
 
 bool Treasure_Hunt::is_valid_index(char c, size_t row, size_t col){
@@ -267,7 +165,6 @@ void Treasure_Hunt::captain_search(Coordinate c) {
                 Coordinate next = c;
                 if (is_valid_index(direction, next.row, next.col)) {
                     move(next, direction);
-                    //Point &point = map[p.row][p.col];
                     if (map[next.row][next.col].value == '.' && !map[next.row][next.col].discovered) {
                         map[next.row][next.col].discovered = true;
                         map[next.row][next.col].direction = direction;
