@@ -12,18 +12,20 @@ struct Coordinate {
     size_t row;
     size_t col;
 };
+// make a pair
+
 
 struct Point {
-    char direction = ' ';
+    char direction;
     char value;
-    bool discovered = false;
-
-    Point(char v = ' ') : value(v) {}
+    Point() : direction(' '), value(' ') {}
+    Point(char d, char v) : direction(d), value(v) {}
 };
 
 
 class Treasure_Hunt {
     public:
+        Treasure_Hunt() {}
 
         Treasure_Hunt(std::string hunt_order_in, bool v, bool s, bool p, char pt, char c, char f) : 
                 hunt_order (hunt_order_in), verbose (v), stats (s), show_path (p), path_type(pt),
@@ -31,26 +33,21 @@ class Treasure_Hunt {
 
 
         void create_map(); //reads the input file and creates the grid
-
         void hunt();
-        void captain_search(Coordinate c);
+        void captain_search();
         void first_mate_search(Coordinate c); 
         void print_results();
         void print_grid();
         void print_stats();
         void print_path();
         void backtrace();
+        void backtrace_path();
     
     private:
         std::vector<std::vector<Point>> map; //pass by reference in functions
-        std::deque<Point> captain_container;
-        std::deque<Point> first_mate_container;
-        std::deque<Coordinate> sail_path;
-        std::deque<Coordinate> search_path;
         Coordinate start;
         Coordinate treasure;
         bool is_valid_index(char c, size_t row, size_t col);
-        void add_to_container(char c, Point p);
         void move(Coordinate &c, char direction);
         std::string hunt_order = "NESW";
         bool verbose = false;

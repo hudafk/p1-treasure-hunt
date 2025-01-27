@@ -24,6 +24,7 @@ void printHelp(char *command) {
     cout << "Usage: " << command << " under construction~" << endl;
 }
 
+
 void getOptions(int argc, char **argv, Options &options) {
     opterr = static_cast<int>(false);
     int choice;
@@ -44,7 +45,7 @@ void getOptions(int argc, char **argv, Options &options) {
         switch (choice) {
             case 'h': {
                 printHelp(*argv); //print help statements
-                exit(1);
+                exit(0);
             }
             case 'c': {
                 if (optarg && (string(optarg) == "STACK" || string(optarg) == "QUEUE")) {
@@ -60,7 +61,7 @@ void getOptions(int argc, char **argv, Options &options) {
                 if (optarg && (string(optarg) == "STACK" || string(optarg) == "QUEUE")) {
                     options.firstMateContainer = optarg[0];
                 } else {
-                    cerr << "Invalid argument to --captain" << endl;
+                    cerr << "Invalid argument to --first-mate" << endl;
                     exit(1);
                 }
                 break;
@@ -73,11 +74,15 @@ void getOptions(int argc, char **argv, Options &options) {
                         exit(1);
                     } 
                     string valid = "NESW";
-                    for (char c : valid) {
-                        if(count(str.begin(), str.end(), c != 1)) {
+                    for (char c : str) {
+                        if(valid.find(c) == string::npos) {
                             cerr << "Invalid argument to --hunt-order" << endl;
                             exit(1);
                         }
+                    }
+                    if(unique(str.begin(), str.end()) != str.end())  {
+                        cerr << "Invalid argument to --hunt-order" << endl;
+                        exit(1);
                     }
                     options.huntOrder = str; //hunt order specified
                 }
@@ -115,8 +120,6 @@ void getOptions(int argc, char **argv, Options &options) {
         }
     }
 }
-
-
 
 int main(int argc, char *argv[]) {
     ios_base::sync_with_stdio(false);
