@@ -1,0 +1,7 @@
+#Testing all land aside from start
+M
+4
+oooo
+oo@o
+oooo
+ooo$

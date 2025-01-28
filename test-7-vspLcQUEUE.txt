@@ -1,0 +1,9 @@
+#treasure surrounded
+#unreachable
+#this is a logn comment full of yap to make sure that comments are properly being read in
+M
+4
+....
+.@..
+..##
+.#$.

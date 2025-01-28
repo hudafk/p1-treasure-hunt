@@ -4,68 +4,56 @@
 #include <sstream>
 
 void Treasure_Hunt::create_map() {
-
-    std:: string line;
-
+        
+    std::string line;
+    
     while(std::getline(std::cin, line)) {
-        if (line[0] != '#') break;
+            if (line[0] != '#') break;
     }
 
-    char format = line[0]; //take in 'M' or 'L' for format
+    char format = line[0];
 
-    int map_size; //the size of the map
+    int m;
 
-    std::cin >> map_size;
+    std::cin >> m;
 
-    map.resize(static_cast<size_t>(map_size), std::vector<Point>(static_cast<size_t>(map_size)));
+    size_t map_size = static_cast<size_t>(m);
 
-    std::cin.ignore(); //ignore newline char
+    map.resize(map_size, std::vector<Point>(map_size));
 
-    if (format == 'M') { //read the map format
-
+    if(format == 'M'){
         size_t row = 0;
 
-        while(std::getline(std::cin, line)) {
+        while(row < map_size) {
+            std::cin >> line;
 
-            if (line.empty()) continue;
-
-            for (size_t col = 0; col < static_cast<size_t>(map_size); ++col) {
+            for(size_t col = 0; col < map_size; ++col) {
 
                 map[row][col].value = line[col];
 
-                if (line[col] == '@') {
+                if(line[col] == '@') {
                     start.row = row;
                     start.col = col;
                 }
 
-                if (line[col] == '$') {
+                if(line[col] == '$') {
                     treasure.row = row;
                     treasure.col = col;
-                } 
+                }
+
             }
-                row++;
+            row++;
         }
-    } 
 
+    } else {
+        int r, c;
+        char terrain;
 
-    else { //read the list format
-
-        std::string line;
-
-        while(std::getline(std::cin, line)) {
-
-            if (line.empty()) continue;
-
-            int r = line[0] - '0';
-
-            int c = line[2] - '0';
-
-            char terrain = line[4];
-
+        while(std::cin >> r >> c >> terrain) {
             size_t row = static_cast<size_t>(r);
             size_t col = static_cast<size_t>(c);
 
-            if (terrain == '@') {
+            if(terrain == '@') {
                 start.row = row;
                 start.col = col;
             }
@@ -76,10 +64,12 @@ void Treasure_Hunt::create_map() {
             }
 
             map[row][col].value = terrain;
-
         }
-    } 
+    }
+
+
 }
+        
 
 bool Treasure_Hunt::is_valid_index(char c, size_t row, size_t col){
     if (c == 'N') return (static_cast<int>(row) - 1 >= 0);

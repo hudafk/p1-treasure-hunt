@@ -1,0 +1,7 @@
+#Testing no path
+M
+4
+$o.o
+..oo
+...#
+o.#@

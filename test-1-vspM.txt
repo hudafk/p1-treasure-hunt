@@ -1,0 +1,7 @@
+# this test uses default settings
+# checks if map is 
+# M
+M
+2
+@$
+..

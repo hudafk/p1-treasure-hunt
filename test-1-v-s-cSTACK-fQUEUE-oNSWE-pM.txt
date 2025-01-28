@@ -1,0 +1,10 @@
+#testing
+#invalid
+# the start is surrounded entirely by land
+M
+5
+o.o.o
+.o@oo
+.oooo
+..o.#
+o.o#$

@@ -1,0 +1,9 @@
+--- STATS ---
+Starting location: 50,10
+Water locations investigated: 962
+Land locations investigated: 1
+Went ashore: 1
+Path length: 962
+Treasure location: 999,3
+--- STATS ---
+Treasure found at 999,3 with path length 962.

@@ -1,0 +1,6 @@
+oX...
+o|...
+#|.o.
+.|oo.
+.+--@
+Treasure found at 0,1 with path length 7.
