@@ -18,7 +18,7 @@ struct Coordinate {
 struct Point {
     char direction;
     char value;
-    Point() : direction(' '), value(' ') {}
+    Point() : direction(' '), value('.') {}
     Point(char d, char v) : direction(d), value(v) {}
 };
 

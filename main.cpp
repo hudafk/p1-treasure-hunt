@@ -48,22 +48,30 @@ void getOptions(int argc, char **argv, Options &options) {
                 exit(0);
             }
             case 'c': {
-                if (optarg && (string(optarg) == "STACK" || string(optarg) == "QUEUE")) {
-                        options.captainContainer = optarg[0];
-                    } 
-                else {
+                if(optarg) {
+                    if(string(optarg) != "STACK" && string(optarg) != "QUEUE"){
+                        cerr << "Invalid argument to --captain" << endl;
+                        exit(1);
+                    }
+                    options.captainContainer = optarg[0];
+                } else {
                     cerr << "Invalid argument to --captain" << endl;
                     exit(1);
-                } //set captain's container type
+                } 
+                //set captain's container type
                 break;
             }
             case 'f': {
-                if (optarg && (string(optarg) == "STACK" || string(optarg) == "QUEUE")) {
+                if(optarg) {
+                    if(string(optarg) != "STACK" && string(optarg) != "QUEUE"){
+                        cerr << "Invalid argument to --first-mate" << endl;
+                        exit(1);
+                    }
                     options.firstMateContainer = optarg[0];
                 } else {
                     cerr << "Invalid argument to --first-mate" << endl;
                     exit(1);
-                }
+                } 
                 break;
             }
             case 'o': {
@@ -99,13 +107,17 @@ void getOptions(int argc, char **argv, Options &options) {
                 } 
                 options.showPath = true; //show path
                 if (optarg) {
-                    if(optarg[0] == 'M' || optarg[0] == 'L') {
+                    if(string(optarg) == "M" || string(optarg) == "L") {
                         options.pathType = optarg[0];
                     } 
                     else {
                         cerr << "Invalid argument to --show-path" << endl;
                         exit(1);
                     }
+                }
+                else {
+                    cerr << "Invalid argument to --show-path" << endl;
+                    exit(1);
                 }
                 break;
             }
